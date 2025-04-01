@@ -18,7 +18,6 @@ import (
 	"gomp/pkg/ecs"
 	"gomp/stdcomponents"
 	"gomp/vectors"
-	"math"
 	"math/bits"
 	"slices"
 )
@@ -34,16 +33,16 @@ type leaf struct {
 type component struct {
 	entity ecs.Entity
 	aabb   *stdcomponents.AABB
-	code   uint32
+	code   uint64
 }
 
 func NewTree(layer stdcomponents.CollisionLayer) Tree {
 	return Tree{
 		nodes:      ecs.NewPagedArray[node](),
-		aabbNodes:  ecs.NewPagedArray[stdcomponents.AABB](),
+		AabbNodes:  ecs.NewPagedArray[stdcomponents.AABB](),
 		leaves:     ecs.NewPagedArray[leaf](),
-		aabbLeaves: ecs.NewPagedArray[*stdcomponents.AABB](),
-		codes:      ecs.NewPagedArray[uint32](),
+		AabbLeaves: ecs.NewPagedArray[*stdcomponents.AABB](),
+		codes:      ecs.NewPagedArray[uint64](),
 		components: ecs.NewPagedArray[component](),
 		layer:      layer,
 	}
@@ -51,17 +50,18 @@ func NewTree(layer stdcomponents.CollisionLayer) Tree {
 
 type Tree struct {
 	nodes      ecs.PagedArray[node]
-	aabbNodes  ecs.PagedArray[stdcomponents.AABB]
+	AabbNodes  ecs.PagedArray[stdcomponents.AABB]
 	leaves     ecs.PagedArray[leaf]
-	aabbLeaves ecs.PagedArray[*stdcomponents.AABB]
-	codes      ecs.PagedArray[uint32]
+	AabbLeaves ecs.PagedArray[*stdcomponents.AABB]
+	codes      ecs.PagedArray[uint64]
 	components ecs.PagedArray[component]
 	layer      stdcomponents.CollisionLayer
+
+	componentsSlice []component
 }
 
 func (t *Tree) AddComponent(entity ecs.Entity, aabb *stdcomponents.AABB) {
-	center := aabb.Min.Add(aabb.Max).Scale(0.5)
-	code := t.morton2D(center.X, center.Y)
+	code := t.morton2D(aabb)
 	t.components.Append(component{
 		entity: entity,
 		aabb:   aabb,
@@ -72,25 +72,27 @@ func (t *Tree) AddComponent(entity ecs.Entity, aabb *stdcomponents.AABB) {
 func (t *Tree) Build() {
 	// Reset tree
 	t.nodes.Reset()
-	t.aabbNodes.Reset()
+	t.AabbNodes.Reset()
 	t.leaves.Reset()
-	t.aabbLeaves.Reset()
+	t.AabbLeaves.Reset()
 	t.codes.Reset()
 
 	// Extract and sort components by morton code
-	var componentsSlice = make([]component, 0, t.components.Len())
-	for i := 0; i < t.components.Len(); i++ {
-		componentsSlice = append(componentsSlice, t.components.GetValue(i))
+	if cap(t.componentsSlice) < t.components.Len() {
+		t.componentsSlice = make([]component, 0, t.components.Len())
 	}
-	slices.SortFunc(componentsSlice, func(a, b component) int {
-		return int(a.code) - int(b.code)
+
+	t.componentsSlice = t.components.Raw(t.componentsSlice)
+
+	slices.SortFunc(t.componentsSlice, func(a, b component) int {
+		return int(a.code - b.code)
 	})
 
 	// Add leaves
-	for i := range componentsSlice {
-		component := &componentsSlice[i]
+	for i := range t.componentsSlice {
+		component := &t.componentsSlice[i]
 		t.leaves.Append(leaf{id: component.entity})
-		t.aabbLeaves.Append(component.aabb)
+		t.AabbLeaves.Append(component.aabb)
 		t.codes.Append(component.code)
 	}
 	t.components.Reset()
@@ -101,7 +103,7 @@ func (t *Tree) Build() {
 
 	// Add root node
 	t.nodes.Append(node{-1})
-	t.aabbNodes.Append(stdcomponents.AABB{})
+	t.AabbNodes.Append(stdcomponents.AABB{})
 
 	type buildTask struct {
 		parentIndex     int
@@ -123,7 +125,7 @@ func (t *Tree) Build() {
 			if task.start == task.end {
 				// Leaf node
 				t.nodes.Get(task.parentIndex).childIndex = -int32(task.start)
-				t.aabbNodes.Set(task.parentIndex, *t.aabbLeaves.GetValue(task.start))
+				t.AabbNodes.Set(task.parentIndex, *t.AabbLeaves.GetValue(task.start))
 				continue
 			}
 
@@ -131,10 +133,8 @@ func (t *Tree) Build() {
 
 			// Create left and right nodes
 			leftIndex := t.nodes.Len()
-			t.nodes.Append(node{-1})
-			t.nodes.Append(node{-1})
-			t.aabbNodes.Append(stdcomponents.AABB{})
-			t.aabbNodes.Append(stdcomponents.AABB{})
+			t.nodes.Append(node{-1}, node{-1})
+			t.AabbNodes.Append(stdcomponents.AABB{}, stdcomponents.AABB{})
 
 			// Set parent's childIndex to leftIndex
 			t.nodes.Get(task.parentIndex).childIndex = int32(leftIndex)
@@ -167,13 +167,14 @@ func (t *Tree) Build() {
 			leftChildIndex := int(t.nodes.Get(task.parentIndex).childIndex)
 			rightChildIndex := leftChildIndex + 1
 
-			leftAABB := t.aabbNodes.Get(leftChildIndex)
-			rightAABB := t.aabbNodes.Get(rightChildIndex)
+			leftAABB := t.AabbNodes.Get(leftChildIndex)
+			rightAABB := t.AabbNodes.Get(rightChildIndex)
 
 			merged := t.mergeAABB(leftAABB, rightAABB)
-			t.aabbNodes.Set(task.parentIndex, merged)
+			t.AabbNodes.Set(task.parentIndex, merged)
 		}
 	}
+	t.components.Reset()
 }
 
 func (t *Tree) Layer() stdcomponents.CollisionLayer {
@@ -187,15 +188,13 @@ func (t *Tree) Query(aabb *stdcomponents.AABB, result []ecs.Entity) []ecs.Entity
 
 	// Use stack-based traversal
 	const stackSize = 32
-	stack := [stackSize]int{}
-	stackPtr := 0
-	stack[stackPtr] = 0
-	stackPtr++
+	stack := [stackSize]int32{0}
+	stackLen := 1
 
-	for stackPtr > 0 {
-		stackPtr--
-		nodeIndex := stack[stackPtr]
-		a := t.aabbNodes.Get(nodeIndex)
+	for stackLen > 0 {
+		stackLen--
+		nodeIndex := int(stack[stackLen])
+		a := t.AabbNodes.Get(nodeIndex)
 		b := aabb
 
 		// Early exit if no AABB overlap
@@ -207,14 +206,17 @@ func (t *Tree) Query(aabb *stdcomponents.AABB, result []ecs.Entity) []ecs.Entity
 		if node.childIndex <= 0 {
 			// Is a leaf
 			index := -int(node.childIndex)
-			result = append(result, t.leaves.Get(index).id)
+			leafAabb := t.AabbLeaves.GetValue(index)
+			if t.aabbOverlap(leafAabb, aabb) {
+				result = append(result, t.leaves.Get(index).id)
+			}
 			continue
 		}
 
 		// Push child indices (right and left) onto the stack.
-		stack[stackPtr] = int(node.childIndex + 1)
-		stack[stackPtr+1] = int(node.childIndex)
-		stackPtr += 2
+		stack[stackLen] = node.childIndex + 1
+		stack[stackLen+1] = node.childIndex
+		stackLen += 2
 	}
 
 	return result
@@ -238,7 +240,7 @@ func (t *Tree) findSplit(start, end int) int {
 
 	// Calculate the number of highest bits that are the same
 	// for all objects, using the count-leading-zeros intrinsic.
-	commonPrefix := bits.LeadingZeros32(first ^ last)
+	commonPrefix := bits.LeadingZeros64(first ^ last)
 
 	// Use binary search to find where the next bit differs.
 	// Specifically, we are looking for the highest object that
@@ -252,7 +254,7 @@ func (t *Tree) findSplit(start, end int) int {
 
 		if newSplit < end {
 			splitCode := t.codes.GetValue(newSplit)
-			splitPrefix := bits.LeadingZeros32(first ^ splitCode)
+			splitPrefix := bits.LeadingZeros64(first ^ splitCode)
 			if splitPrefix > commonPrefix {
 				split = newSplit
 			}
@@ -282,18 +284,36 @@ func (t *Tree) mergeAABB(a, b *stdcomponents.AABB) stdcomponents.AABB {
 
 // Expands a 16-bit integer into 32 bits by inserting 1 zero after each bit
 func (t *Tree) expandBits2D(v uint32) uint32 {
-	v = (v | (v << 16)) & 0x030000FF
-	v = (v | (v << 8)) & 0x0300F00F
-	v = (v | (v << 4)) & 0x030C30C3
-	v = (v | (v << 2)) & 0x09249249
+	v = (v | (v << 8)) & 0x00FF00FF
+	v = (v | (v << 4)) & 0x0F0F0F0F
+	v = (v | (v << 2)) & 0x33333333
+	v = (v | (v << 1)) & 0x55555555
 	return v
 }
 
-const mortonPrecision = 1 << 16
+const mortonPrecision = (1 << 16) - 1
 
-// 2D Morton code for centroids coordinates in [0,1] range
-func (t *Tree) morton2D(x, y float32) uint32 {
-	xx := uint32(math.Min(math.Max(float64(x)*mortonPrecision, 0.0), mortonPrecision-1))
-	yy := uint32(math.Min(math.Max(float64(y)*mortonPrecision, 0.0), mortonPrecision-1))
-	return (t.expandBits2D(xx) << 1) | t.expandBits2D(yy)
+func (t *Tree) morton2D(aabb *stdcomponents.AABB) uint64 {
+	center := aabb.Center()
+	// Scale coordinates to 16-bit integers
+
+	xx := uint64(center.X * mortonPrecision)
+	yy := uint64(center.Y * mortonPrecision)
+
+	// Spread the bits of x into the even positions
+	xx = (xx | (xx << 16)) & 0x0000FFFF0000FFFF
+	xx = (xx | (xx << 8)) & 0x00FF00FF00FF00FF
+	xx = (xx | (xx << 4)) & 0x0F0F0F0F0F0F0F0F
+	xx = (xx | (xx << 2)) & 0x3333333333333333
+	xx = (xx | (xx << 1)) & 0x5555555555555555
+
+	// Spread the bits of y into the even positions and shift to odd positions
+	yy = (yy | (yy << 16)) & 0x0000FFFF0000FFFF
+	yy = (yy | (yy << 8)) & 0x00FF00FF00FF00FF
+	yy = (yy | (yy << 4)) & 0x0F0F0F0F0F0F0F0F
+	yy = (yy | (yy << 2)) & 0x3333333333333333
+	yy = (yy | (yy << 1)) & 0x5555555555555555
+
+	// Combine x (even bits) and y (odd bits)
+	return xx | (yy << 1)
 }

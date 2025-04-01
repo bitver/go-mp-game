@@ -10,6 +10,7 @@ import (
 	"gomp/pkg/ecs"
 )
 
+// StdComponentIds MUST always be the last
 const (
 	InvalidComponentId ecs.ComponentId = iota
 	TransformComponentId
@@ -21,8 +22,8 @@ const (
 	SpriteComponentId
 	SpriteSheetComponentId
 	SpriteMatrixComponentId
-	SpriteMatrixV2ComponentId
 	RLTextureProComponentId
+	SpriteMatrixV2ComponentId
 	AnimationPlayerComponentId
 	AnimationStateComponentId
 	TintComponentId
@@ -41,5 +42,6 @@ const (
 	RigidBodyComponentId
 	SDLTextureComponentId
 	SDLSpriteComponentId
+	BvhTreeComponentId
 	StdComponentIds
 )
