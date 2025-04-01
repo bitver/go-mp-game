@@ -12,22 +12,21 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package components
 
 import (
+	"gomp/pkg/ecs"
 	"time"
 )
 
-type SceneId uint16
+type Weapon struct {
+	Damage       int
+	Cooldown     time.Duration
+	CooldownLeft time.Duration
+}
 
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
+type WeaponComponentManager = ecs.ComponentManager[Weapon]
+
+func NewWeaponComponentManager() WeaponComponentManager {
+	return ecs.NewComponentManager[Weapon](WeaponComponentId)
 }

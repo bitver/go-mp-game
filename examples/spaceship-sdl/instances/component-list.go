@@ -1,0 +1,104 @@
+/*
+This Source Code Form is subject to the terms of the Mozilla
+Public License, v. 2.0. If a copy of the MPL was not distributed
+with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+===-===-===-===-===-===-===-===-===-===
+Donations during this file development:
+-===-===-===-===-===-===-===-===-===-===
+
+none :)
+
+Thank you for your support!
+*/
+
+package instances
+
+import (
+	"gomp/examples/spaceship-sdl/components"
+	"gomp/stdcomponents"
+)
+
+type ComponentList struct {
+	Position stdcomponents.PositionComponentManager
+	Rotation stdcomponents.RotationComponentManager
+	Scale    stdcomponents.ScaleComponentManager
+	Velocity stdcomponents.VelocityComponentManager
+	Flip     stdcomponents.FlipComponentManager
+	//Sprite             stdcomponents.SpriteComponentManager
+	SpriteMatrixV2  stdcomponents.SpriteMatrixV2ComponentManager
+	SDLSprites      stdcomponents.SDLSpriteComponentManager
+	Tint            stdcomponents.TintComponentManager
+	AnimationPlayer stdcomponents.AnimationPlayerComponentManager
+	AnimationState  stdcomponents.AnimationStateComponentManager
+	//RLTexturePro       stdcomponents.RLTextureProComponentManager
+	SDLTexture         stdcomponents.SDLTextureComponentManager
+	Network            stdcomponents.NetworkComponentManager
+	Renderable         stdcomponents.RenderableComponentManager
+	YSort              stdcomponents.YSortComponentManager
+	RenderOrder        stdcomponents.RenderOrderComponentManager
+	GenericCollider    stdcomponents.GenericColliderComponentManager
+	ColliderBox        stdcomponents.BoxColliderComponentManager
+	ColliderCircle     stdcomponents.CircleColliderComponentManager
+	ColliderSleepState stdcomponents.ColliderSleepStateComponentManager
+	Collision          stdcomponents.CollisionComponentManager
+	AABB               stdcomponents.AABBComponentManager
+	SpatialIndex       stdcomponents.SpatialIndexComponentManager
+	RigidBody          stdcomponents.RigidBodyComponentManager
+
+	Health               components.HpComponentManager
+	Controller           components.ControllerComponentManager
+	PlayerTag            components.PlayerTagComponentManager
+	BulletTag            components.BulletTagComponentManager
+	AsteroidTag          components.AsteroidComponentManager
+	SpaceSpawnerTag      components.SpaceSpawnerComponentManager
+	KeyboardInput        components.KeyboardInputComponentManager
+	Wall                 components.WallTagComponentManager
+	Weapon               components.WeaponComponentManager
+	SpaceshipIntent      components.SpaceshipIntentComponentManager
+	AsteroidSceneManager components.AsteroidSceneManagerComponentManager
+	SoundEffects         components.SoundEffectsComponentManager
+}
+
+func NewComponentList() ComponentList {
+	return ComponentList{
+		Position: stdcomponents.NewPositionComponentManager(),
+		Rotation: stdcomponents.NewRotationComponentManager(),
+		Scale:    stdcomponents.NewScaleComponentManager(),
+		Velocity: stdcomponents.NewVelocityComponentManager(),
+		Flip:     stdcomponents.NewFlipComponentManager(),
+		//Sprite:             stdcomponents.NewSpriteComponentManager(),
+		SDLSprites:      stdcomponents.NewSDLSpriteComponentManager(),
+		SpriteMatrixV2:  stdcomponents.NewSpriteMatrixV2ComponentManager(),
+		Tint:            stdcomponents.NewTintComponentManager(),
+		AnimationPlayer: stdcomponents.NewAnimationPlayerComponentManager(),
+		AnimationState:  stdcomponents.NewAnimationStateComponentManager(),
+		//RLTexturePro:       stdcomponents.NewRlTextureProComponentManager(),
+		SDLTexture:         stdcomponents.NewSDLTextureComponentManager(),
+		Network:            stdcomponents.NewNetworkComponentManager(),
+		Renderable:         stdcomponents.NewRenderableComponentManager(),
+		YSort:              stdcomponents.NewYSortComponentManager(),
+		RenderOrder:        stdcomponents.NewRenderOrderComponentManager(),
+		GenericCollider:    stdcomponents.NewGenericColliderComponentManager(),
+		ColliderBox:        stdcomponents.NewBoxColliderComponentManager(),
+		ColliderCircle:     stdcomponents.NewCircleColliderComponentManager(),
+		ColliderSleepState: stdcomponents.NewColliderSleepStateComponentManager(),
+		Collision:          stdcomponents.NewCollisionComponentManager(),
+		AABB:               stdcomponents.NewAABBComponentManager(),
+		SpatialIndex:       stdcomponents.NewSpatialIndexComponentManager(),
+		RigidBody:          stdcomponents.NewRigidBodyComponentManager(),
+
+		Health:               components.NewHealthComponentManager(),
+		Controller:           components.NewControllerComponentManager(),
+		PlayerTag:            components.NewPlayerTagComponentManager(),
+		BulletTag:            components.NewBulletTagComponentManager(),
+		Wall:                 components.NewWallComponentManager(),
+		AsteroidTag:          components.NewAsteroidTagComponentManager(),
+		SpaceSpawnerTag:      components.NewSpaceSpawnerTagComponentManager(),
+		KeyboardInput:        components.NewKeyboardInputComponentManager(),
+		Weapon:               components.NewWeaponComponentManager(),
+		SpaceshipIntent:      components.NewSpaceshipIntentComponentManager(),
+		AsteroidSceneManager: components.NewAsteroidSceneManagerComponentManager(),
+		SoundEffects:         components.NewSoundEffectsComponentManager(),
+	}
+}

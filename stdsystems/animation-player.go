@@ -7,7 +7,6 @@ with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 package stdsystems
 
 import (
-	"gomp/pkg/ecs"
 	"gomp/stdcomponents"
 	"time"
 
@@ -19,7 +18,7 @@ func NewAnimationPlayerSystem() AnimationPlayerSystem {
 }
 
 type AnimationPlayerSystem struct {
-	AnimationPlayers *ecs.ComponentManager[stdcomponents.AnimationPlayer]
+	AnimationPlayers *stdcomponents.AnimationPlayerComponentManager
 	lastRunAt        time.Time
 }
 

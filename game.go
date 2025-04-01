@@ -29,7 +29,7 @@ type AnyGame interface {
 	ShouldDestroy() bool
 }
 
-func NewGame(scenes ...AnyScene) Game {
+func NewGame(renderer RenderSystem, scenes ...AnyScene) Game {
 	sceneSet := make(map[SceneId]AnyScene, len(scenes))
 
 	for i := range len(scenes) {
@@ -39,11 +39,12 @@ func NewGame(scenes ...AnyScene) Game {
 		assert.False(exists, "Scene with id %d already exists. Duplicating ids?", id)
 
 		sceneSet[id] = scenes[i]
+		sceneSet[id].SetRenderer(renderer)
 	}
 
 	game := Game{
 		Scenes:       sceneSet,
-		RenderSystem: NewRenderSystem(),
+		RenderSystem: renderer,
 	}
 
 	return game
@@ -85,7 +86,11 @@ func (g *Game) FixedUpdate(dt time.Duration) {
 func (g *Game) Render(dt time.Duration) {
 	scene, ok := g.Scenes[g.CurrentSceneId]
 	assert.True(ok, "Scene not found")
+	if !g.RenderSystem.Prerender() {
+		g.shouldDestroy = true
+	}
 	scene.Render(dt)
+	g.RenderSystem.Render(dt)
 }
 
 func (g *Game) Destroy() {

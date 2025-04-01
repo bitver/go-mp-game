@@ -19,25 +19,37 @@ import (
 	"time"
 )
 
-func NewRenderSystem() RenderSystem {
-	return RenderSystem{}
+func NewRlRenderSystem(windowTitle string, width, height int32) *SDLRender {
+	return &SDLRender{
+		windowTitle: windowTitle,
+		width:       width,
+		height:      height,
+	}
 }
 
-type RenderSystem struct{}
+type RlRenderSystem struct {
+	windowTitle string
+	width       int32
+	height      int32
+}
 
-func (s *RenderSystem) Init() {
+func (s *RlRenderSystem) Init() {
 	//monitor := rl.GetCurrentMonitor()
 	//width, height := rl.GetMonitorWidth(monitor), rl.GetMonitorHeight(monitor)
-	rl.InitWindow(1280, 720, "raylib [core] ebiten-ecs - basic window")
+	rl.InitWindow(s.width, s.height, s.windowTitle)
 	//rl.SetWindowState(rl.FlagFullscreenMode)
 }
-func (s *RenderSystem) Run(dt time.Duration) bool {
+
+func (s *RlRenderSystem) Prerender() bool {
 	if rl.WindowShouldClose() {
 		return false
 	}
 	return true
 }
 
-func (s *RenderSystem) Destroy() {
+func (s *RlRenderSystem) Render(dt time.Duration) {
+}
+
+func (s *RlRenderSystem) Destroy() {
 	rl.CloseWindow()
 }

@@ -19,7 +19,7 @@ package scenes
 
 import (
 	"gomp"
-	"gomp/examples/new-api/instances"
+	"gomp/examples/spaceship-sdl/instances"
 	"gomp/pkg/ecs"
 	"time"
 )
@@ -56,6 +56,9 @@ COMPONENTS:
 - sprite, collider
 */
 
+// NewAssteroddScene creates a new Assterodd scene
+// TODO: Complete rewrite of hierarchy of the game
+// temporary workaround
 func NewAssteroddScene() AssteroddScene {
 	return AssteroddScene{
 		World: ecs.NewWorld(instances.NewComponentList(), instances.NewSystemList()),
@@ -65,18 +68,28 @@ func NewAssteroddScene() AssteroddScene {
 type AssteroddScene struct {
 	Game  *gomp.Game
 	World instances.World
+	//renderer *gomp.SDLRender
 }
 
 func (s *AssteroddScene) Id() gomp.SceneId {
 	return AssteroddSceneId
 }
 
-// SetRenderer is a stub function
+// SetRenderer sets the renderer for the scene
+// TODO: Complete rewrite of hierarchy of the game
+// temporary workaround
 func (s *AssteroddScene) SetRenderer(renderer gomp.RenderSystem) {
+	if r, ok := renderer.(*gomp.SDLRender); !ok {
+		panic("renderer is not a *SDLRender")
+	} else {
+		s.World.Systems.RenderAssterodd.SetRenderer(r)
+	}
 }
 
 func (s *AssteroddScene) Init() {
 	s.World.Init()
+	s.World.Systems.Keyboard.Init()
+	s.World.Systems.Player.Init()
 	s.World.Systems.ColliderSystem.Init()
 
 	// Scenes
@@ -90,11 +103,11 @@ func (s *AssteroddScene) Init() {
 	s.World.Systems.CollisionResolution.Init()
 
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Init()
+	s.World.Systems.AnimationSpriteMatrixV2.Init()
 	s.World.Systems.AnimationPlayer.Init()
 
-	s.World.Systems.SpriteMatrix.Init()
-	s.World.Systems.Sprite.Init()
+	s.World.Systems.SpriteMatrixV2.Init()
+	//s.World.Systems.Sprite.Init()
 	s.World.Systems.YSort.Init()
 
 	// RenderAssterodd
@@ -106,6 +119,9 @@ func (s *AssteroddScene) Init() {
 }
 
 func (s *AssteroddScene) Update(dt time.Duration) gomp.SceneId {
+	s.World.Systems.Keyboard.Run()
+	s.World.Systems.Player.Run()
+
 	s.World.Systems.ColliderSystem.Run(dt)
 	s.World.Systems.AssteroddSystem.Run(dt)
 	s.World.Systems.Audio.Run(dt)
@@ -127,11 +143,11 @@ func (s *AssteroddScene) FixedUpdate(dt time.Duration) {
 
 func (s *AssteroddScene) Render(dt time.Duration) {
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Run()
+	s.World.Systems.AnimationSpriteMatrixV2.Run()
 	s.World.Systems.AnimationPlayer.Run()
 
-	s.World.Systems.SpriteMatrix.Run()
-	s.World.Systems.Sprite.Run()
+	s.World.Systems.SpriteMatrixV2.Run()
+	//s.World.Systems.Sprite.Run()
 	s.World.Systems.Debug.Run()
 	s.World.Systems.AssetLib.Run()
 	s.World.Systems.YSort.Run()
@@ -160,11 +176,11 @@ func (s *AssteroddScene) Destroy() {
 	s.World.Systems.DampingSystem.Destroy()
 
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Destroy()
+	s.World.Systems.AnimationSpriteMatrixV2.Destroy()
 	s.World.Systems.AnimationPlayer.Destroy()
 
-	s.World.Systems.Sprite.Destroy()
-	s.World.Systems.SpriteMatrix.Destroy()
+	//s.World.Systems.Sprite.Destroy()
+	//s.World.Systems.SpriteMatrixV2.Destroy()
 	s.World.Systems.YSort.Destroy()
 
 	// RenderAssterodd

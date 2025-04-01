@@ -21,6 +21,7 @@ const (
 	SpriteComponentId
 	SpriteSheetComponentId
 	SpriteMatrixComponentId
+	SpriteMatrixV2ComponentId
 	RLTextureProComponentId
 	AnimationPlayerComponentId
 	AnimationStateComponentId
@@ -38,5 +39,7 @@ const (
 	SpatialIndexComponentId
 	AABBComponentId
 	RigidBodyComponentId
+	SDLTextureComponentId
+	SDLSpriteComponentId
 	StdComponentIds
 )

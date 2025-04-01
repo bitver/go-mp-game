@@ -70,6 +70,10 @@ func main() {
 
 	frameTimes := make([]float64, 0, frameCount)
 
+	err = initLetterAtlas(renderer, font)
+	must(err)
+	defer cleanupLetterAtlas()
+
 Outer:
 	for {
 		if renderTicker != nil {
@@ -110,9 +114,9 @@ Outer:
 			must(renderer.FillRectsF(rects[i : i+batchSize]))
 		}
 
-		must(drawText(renderer, font, 10, 10, fmt.Sprintf("FPS %f", fps)))
-		must(drawText(renderer, font, 10, 30, fmt.Sprintf("Avg FPS %f", avgFps)))
-		must(drawText(renderer, font, 10, 50, fmt.Sprintf("dt %s", dt.String())))
+		must(drawText(renderer, 10, 10, fmt.Sprintf("FPS %f", fps)))
+		must(drawText(renderer, 10, 30, fmt.Sprintf("Avg FPS %f", avgFps)))
+		must(drawText(renderer, 10, 50, fmt.Sprintf("dt %s", dt.String())))
 
 		renderer.Present()
 	}
@@ -125,61 +129,114 @@ func must(err error) {
 	}
 }
 
-// Cache all char textures on the fly
-// TODO: preload all chars initially (maybe +1FPS)
-var letterCache [256]*sdl.Texture
+// Single texture atlas approach
+var letterAtlasTexture *sdl.Texture
+var letterPositions []sdl.Rect
 
-func drawText(renderer *sdl.Renderer, font *ttf.Font, x, y int32, text string) error {
-	var totalWidth int32
-	var maxHeight int32
+func initLetterAtlas(renderer *sdl.Renderer, font *ttf.Font) error {
+	// Create an array sized to fit all printable ASCII characters
+	letterPositions = make([]sdl.Rect, '~'-' '+1)
 
-	for _, char := range text {
-		if char < 256 {
-			if texture := letterCache[char]; texture != nil {
-				_, _, w, h, err := texture.Query()
-				if err != nil {
-					return err
-				}
-				dst := sdl.Rect{X: x + totalWidth, Y: y, W: w, H: h}
-				if err := renderer.Copy(texture, nil, &dst); err != nil {
-					return err
-				}
-				totalWidth += w
-				if h > maxHeight {
-					maxHeight = h
-				}
-				continue
-			}
-		}
+	// Define the characters to preload (ASCII printable range)
+	chars := []rune{}
+	for r := ' '; r <= '~'; r++ {
+		chars = append(chars, r)
+	}
 
+	// First pass: render each character to measure sizes
+	var totalWidth, maxHeight int32 = 0, 0
+	tempSurfaces := make(map[rune]*sdl.Surface)
+
+	for _, char := range chars {
 		surface, err := font.RenderUTF8Blended(string(char), sdl.Color{R: 255, G: 255, B: 255, A: 255})
 		if err != nil {
 			return err
 		}
-		defer surface.Free()
 
-		texture, err := renderer.CreateTextureFromSurface(surface)
-		if err != nil {
-			return err
-		}
-		if char < 256 {
-			letterCache[char] = texture
-		}
-
-		_, _, w, h, err := texture.Query()
-		if err != nil {
-			return err
-		}
-
-		dst := sdl.Rect{X: x + totalWidth, Y: y, W: w, H: h}
-		if err := renderer.Copy(texture, nil, &dst); err != nil {
-			return err
-		}
-		totalWidth += w
-		if h > maxHeight {
-			maxHeight = h
+		tempSurfaces[char] = surface
+		totalWidth += surface.W
+		if surface.H > maxHeight {
+			maxHeight = surface.H
 		}
 	}
 
+	// Create a single large surface for our atlas
+	atlasSurface, err := sdl.CreateRGBSurface(0, totalWidth, maxHeight, 32,
+		0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
+	if err != nil {
+		return err
+	}
+	defer atlasSurface.Free()
+
+	// Place each character in the atlas
+	var xOffset int32 = 0
+	for _, char := range chars {
+		surface := tempSurfaces[char]
+
+		// Record position in the atlas
+		letterPositions[char-' '] = sdl.Rect{
+			X: xOffset,
+			Y: 0,
+			W: surface.W,
+			H: surface.H,
+		}
+
+		// Copy character to atlas
+		srcRect := sdl.Rect{X: 0, Y: 0, W: surface.W, H: surface.H}
+		dstRect := sdl.Rect{X: xOffset, Y: 0, W: surface.W, H: surface.H}
+
+		err = surface.Blit(&srcRect, atlasSurface, &dstRect)
+		if err != nil {
+			return err
+		}
+
+		xOffset += surface.W
+	}
+
+	// Create texture from the atlas
+	letterAtlasTexture, err = renderer.CreateTextureFromSurface(atlasSurface)
+	if err != nil {
+		return err
+	}
+
+	// Free temporary surfaces
+	for _, surface := range tempSurfaces {
+		surface.Free()
+	}
+
 	return nil
+}
+
+func drawText(renderer *sdl.Renderer, x, y int32, text string) error {
+	curX := x
+
+	for _, char := range text {
+		// Check if character is in our range
+		charIndex := int(char - ' ')
+		if charIndex < 0 || charIndex >= len(letterPositions) {
+			curX += 8 // Skip with a default width
+			continue
+		}
+
+		pos := letterPositions[charIndex]
+
+		src := &sdl.Rect{X: pos.X, Y: pos.Y, W: pos.W, H: pos.H}
+		dst := &sdl.Rect{X: curX, Y: y, W: pos.W, H: pos.H}
+
+		// Render the character from the atlas
+		if err := renderer.Copy(letterAtlasTexture, src, dst); err != nil {
+			return err
+		}
+
+		// Advance cursor position
+		curX += pos.W
+	}
+
+	return nil
+}
+
+func cleanupLetterAtlas() {
+	if letterAtlasTexture != nil {
+		letterAtlasTexture.Destroy()
+	}
 }

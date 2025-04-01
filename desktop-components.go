@@ -43,6 +43,7 @@ type DesktopComponents struct {
 	Velocity        stdcomponents.VelocityComponentManager
 	Flip            stdcomponents.FlipComponentManager
 	Sprite          stdcomponents.SpriteComponentManager
+	SDLSprite       stdcomponents.SDLSpriteComponentManager
 	SpriteSheet     stdcomponents.SpriteSheetComponentManager
 	SpriteMatrix    stdcomponents.SpriteMatrixComponentManager
 	Tint            stdcomponents.TintComponentManager

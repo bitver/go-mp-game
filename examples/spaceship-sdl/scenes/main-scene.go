@@ -16,7 +16,7 @@ package scenes
 
 import (
 	"gomp"
-	"gomp/examples/new-api/instances"
+	"gomp/examples/spaceship-sdl/instances"
 	"gomp/pkg/ecs"
 	"time"
 )
@@ -53,10 +53,10 @@ func (s *MainScene) Init() {
 	s.World.Systems.NetworkSend.Init()
 
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Init()
+	s.World.Systems.AnimationSpriteMatrixV2.Init()
 	s.World.Systems.AnimationPlayer.Init()
 
-	s.World.Systems.SpriteMatrix.Init()
+	//s.World.Systems.SpriteMatrixV2.Init()
 	s.World.Systems.YSort.Init()
 
 	// RenderAssterodd
@@ -85,10 +85,10 @@ func (s *MainScene) FixedUpdate(dt time.Duration) {
 
 func (s *MainScene) Render(dt time.Duration) {
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Run()
+	s.World.Systems.AnimationSpriteMatrixV2.Run()
 	s.World.Systems.AnimationPlayer.Run()
 
-	s.World.Systems.SpriteMatrix.Run()
+	//s.World.Systems.SpriteMatrixV2.Run()
 	s.World.Systems.Debug.Run()
 	s.World.Systems.AssetLib.Run()
 	s.World.Systems.YSort.Run()
@@ -114,10 +114,10 @@ func (s *MainScene) Destroy() {
 	s.World.Systems.NetworkSend.Destroy()
 
 	// Animation
-	s.World.Systems.AnimationSpriteMatrix.Destroy()
+	s.World.Systems.AnimationSpriteMatrixV2.Destroy()
 	s.World.Systems.AnimationPlayer.Destroy()
 
-	s.World.Systems.SpriteMatrix.Destroy()
+	//s.World.Systems.SpriteMatrixV2.Destroy()
 	s.World.Systems.YSort.Destroy()
 
 	// RenderAssterodd

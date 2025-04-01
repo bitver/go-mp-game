@@ -12,22 +12,16 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package scenes
 
-import (
-	"time"
-)
+func NewSceneList() SceneList {
+	return SceneList{
+		Main:      NewMainScene(),
+		Assterodd: NewAssteroddScene(),
+	}
+}
 
-type SceneId uint16
-
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
+type SceneList struct {
+	Main      MainScene
+	Assterodd AssteroddScene
 }

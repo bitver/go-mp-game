@@ -12,22 +12,16 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package components
 
-import (
-	"time"
-)
+import "gomp/pkg/ecs"
 
-type SceneId uint16
+type Hp struct {
+	Hp, MaxHp int32
+}
 
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
+type HpComponentManager = ecs.ComponentManager[Hp]
+
+func NewHealthComponentManager() HpComponentManager {
+	return ecs.NewComponentManager[Hp](HealthComponentId)
 }

@@ -12,22 +12,20 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package components
 
 import (
+	"gomp/pkg/ecs"
 	"time"
 )
 
-type SceneId uint16
+type SpaceSpawnerTag struct {
+	Cooldown     time.Duration
+	CooldownLeft time.Duration
+}
 
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
+type SpaceSpawnerComponentManager = ecs.ComponentManager[SpaceSpawnerTag]
+
+func NewSpaceSpawnerTagComponentManager() SpaceSpawnerComponentManager {
+	return ecs.NewComponentManager[SpaceSpawnerTag](SpaceSpawnerTagComponentId)
 }

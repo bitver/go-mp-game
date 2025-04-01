@@ -18,7 +18,7 @@ import (
 	"github.com/hajimehoshi/go-steamworks"
 	"golang.org/x/text/language"
 	"gomp"
-	"gomp/examples/new-api/scenes"
+	"gomp/examples/spaceship-sdl/scenes"
 	"os"
 )
 
@@ -51,12 +51,14 @@ func main() {
 	sceneList := scenes.NewSceneList()
 
 	game := gomp.NewGame(
-		gomp.NewRlRenderSystem("Gomp stomp", 1280, 720),
-		//&sceneList.Main,
+		//Main renderer
+		gomp.NewSDLRenderer("Spaceship SDL", 1280, 720),
+		//Scene list
+		//TODO: Maybe slice?
 		&sceneList.Assterodd,
 	)
 	game.CurrentSceneId = scenes.AssteroddSceneId
 
 	engine := gomp.NewEngine(&game)
-	engine.Run(50, 0)
+	engine.Run(50, 60)
 }

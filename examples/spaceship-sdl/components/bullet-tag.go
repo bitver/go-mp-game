@@ -12,22 +12,15 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package components
 
-import (
-	"time"
-)
+import "gomp/pkg/ecs"
 
-type SceneId uint16
+type BulletTag struct {
+}
 
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
+type BulletTagComponentManager = ecs.ComponentManager[BulletTag]
+
+func NewBulletTagComponentManager() BulletTagComponentManager {
+	return ecs.NewComponentManager[BulletTag](BulletTagComponentId)
 }

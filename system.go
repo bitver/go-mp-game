@@ -14,20 +14,23 @@ Thank you for your support!
 
 package gomp
 
-import (
-	"time"
-)
+import "time"
 
-type SceneId uint16
-
-type AnyScene interface {
+type GameSystem interface {
 	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
+	Run(dt time.Duration)
+	Destroy()
+}
+
+type SceneSystem interface {
+	Init()
+	Run(dt time.Duration)
+	Destroy()
+}
+
+type RenderSystem interface {
+	Init()
+	Prerender() bool
 	Render(dt time.Duration)
 	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
 }

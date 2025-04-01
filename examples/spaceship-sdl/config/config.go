@@ -12,22 +12,14 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package config
 
-import (
-	"time"
+import "gomp/stdcomponents"
+
+const (
+	DefaultCollisionLayer stdcomponents.CollisionLayer = iota
+	PlayerCollisionLayer
+	BulletCollisionLayer
+	EnemyCollisionLayer
+	WallCollisionLayer
 )
-
-type SceneId uint16
-
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
-}

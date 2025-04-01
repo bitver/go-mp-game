@@ -12,22 +12,11 @@ none :)
 Thank you for your support!
 */
 
-package gomp
+package sprites
 
-import (
-	"time"
+import "gomp/pkg/ecs"
+
+const (
+	InvalidSharedComponentId ecs.SharedComponentInstanceId = iota
+	PlayerSpriteSharedComponentId
 )
-
-type SceneId uint16
-
-type AnyScene interface {
-	Init()
-	Update(dt time.Duration) SceneId
-	FixedUpdate(dt time.Duration)
-	Render(dt time.Duration)
-	Destroy()
-	OnEnter()
-	OnExit()
-	Id() SceneId
-	SetRenderer(renderer RenderSystem)
-}

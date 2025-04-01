@@ -15,13 +15,10 @@ Thank you for your support!
 package systems
 
 import (
-	rl "github.com/gen2brain/raylib-go/raylib"
-	"gomp/examples/new-api/components"
-	"gomp/examples/new-api/entities"
+	"gomp/examples/spaceship-sdl/components"
+	"gomp/examples/spaceship-sdl/entities"
 	"gomp/pkg/ecs"
 	"gomp/stdcomponents"
-	"gomp/vectors"
-	"math/rand"
 	"time"
 )
 
@@ -30,15 +27,15 @@ func NewAssteroddSystem() AssteroddSystem {
 }
 
 type AssteroddSystem struct {
-	EntityManager   *ecs.EntityManager
-	Positions       *stdcomponents.PositionComponentManager
-	Rotations       *stdcomponents.RotationComponentManager
-	Scales          *stdcomponents.ScaleComponentManager
-	Velocities      *stdcomponents.VelocityComponentManager
-	Sprites         *stdcomponents.SpriteComponentManager
-	BoxColliders    *stdcomponents.BoxColliderComponentManager
-	CircleColliders *stdcomponents.CircleColliderComponentManager
-	RigidBodies     *stdcomponents.RigidBodyComponentManager
+	EntityManager *ecs.EntityManager
+	Positions     *stdcomponents.PositionComponentManager
+	Rotations     *stdcomponents.RotationComponentManager
+	Scales        *stdcomponents.ScaleComponentManager
+	Velocities    *stdcomponents.VelocityComponentManager
+	//Sprites       *stdcomponents.SpriteComponentManager
+	SDLSprites   *stdcomponents.SDLSpriteComponentManager
+	BoxColliders *stdcomponents.BoxColliderComponentManager
+	RigidBodies  *stdcomponents.RigidBodyComponentManager
 
 	PlayerTags       *components.PlayerTagComponentManager
 	AsteroidTags     *components.AsteroidComponentManager
@@ -46,6 +43,7 @@ type AssteroddSystem struct {
 	Hps              *components.HpComponentManager
 	Weapons          *components.WeaponComponentManager
 	SpaceshipIntents *components.SpaceshipIntentComponentManager
+	KeyboardInput    *components.KeyboardInputComponentManager
 	SpaceSpawnerTags *components.SpaceSpawnerComponentManager
 	Collisions       *stdcomponents.CollisionComponentManager
 	SceneManager     *components.AsteroidSceneManagerComponentManager
@@ -54,30 +52,33 @@ type AssteroddSystem struct {
 }
 
 func (s *AssteroddSystem) Init() {
-	entities.CreateSpaceShip(entities.CreateSpaceShipManagers{
-		EntityManager:    s.EntityManager,
-		Positions:        s.Positions,
-		Rotations:        s.Rotations,
-		Scales:           s.Scales,
-		Velocities:       s.Velocities,
-		Sprites:          s.Sprites,
-		BoxColliders:     s.BoxColliders,
-		RigidBodies:      s.RigidBodies,
-		PlayerTags:       s.PlayerTags,
-		Hps:              s.Hps,
-		Weapons:          s.Weapons,
-		SpaceshipIntents: s.SpaceshipIntents,
-		SoundEffects:     s.SoundEffects,
-	}, 300, 300, -44.9)
+	//entities.CreateSpaceShip(entities.CreateSpaceShipManagers{
+	//	EntityManager: s.EntityManager,
+	//	Positions:     s.Positions,
+	//	Rotations:     s.Rotations,
+	//	Scales:        s.Scales,
+	//	Velocities:    s.Velocities,
+	//	//Sprites:          s.Sprites,
+	//	SDLSprites:       s.SDLSprites,
+	//	BoxColliders:     s.BoxColliders,
+	//	RigidBodies:      s.RigidBodies,
+	//	PlayerTags:       s.PlayerTags,
+	//	KeyboardInput:    s.KeyboardInput,
+	//	Hps:              s.Hps,
+	//	Weapons:          s.Weapons,
+	//	SpaceshipIntents: s.SpaceshipIntents,
+	//	SoundEffects:     s.SoundEffects,
+	//}, 300, 300, -44.9)
 	entities.CreateSatellite(entities.CreateSatelliteManagers{
 		EntityManager: s.EntityManager,
 		Positions:     s.Positions,
 		Rotations:     s.Rotations,
 		Scales:        s.Scales,
 		Velocities:    s.Velocities,
-		Sprites:       s.Sprites,
-		BoxColliders:  s.BoxColliders,
-		RigidBodies:   s.RigidBodies,
+		//Sprites:       s.Sprites,
+		SDLSprites:   s.SDLSprites,
+		BoxColliders: s.BoxColliders,
+		RigidBodies:  s.RigidBodies,
 	}, 500, 500, 0)
 	entities.CreateSpaceSpawner(entities.CreateSpaceSpawnerManagers{
 		EntityManager: s.EntityManager,
@@ -92,33 +93,15 @@ func (s *AssteroddSystem) Init() {
 		Rotations:     s.Rotations,
 		Scales:        s.Scales,
 		BoxColliders:  s.BoxColliders,
-		Sprites:       s.Sprites,
-		WallTags:      s.WallTags,
-		RigidBodies:   s.RigidBodies,
+		//Sprites:       s.Sprites,
+		SDLSprites:  s.SDLSprites,
+		WallTags:    s.WallTags,
+		RigidBodies: s.RigidBodies,
 	}
 	entities.CreateWall(&wallManager, 0, -1000, 0, 5000, 1000)
 	entities.CreateWall(&wallManager, 0, 5000, 0, 5000, 1000)
 	entities.CreateWall(&wallManager, -1000, -1000, 0, 1000, 7000)
 	entities.CreateWall(&wallManager, 5000, -1000, 0, 1000, 7000)
-
-	for range 30000 {
-		randPos := vectors.Vec2{
-			X: float32(rand.Intn(5000)),
-			Y: float32(rand.Intn(5000)),
-		}
-		entities.CreateBullet(entities.CreateBulletManagers{
-			EntityManager:   s.EntityManager,
-			Positions:       s.Positions,
-			Rotations:       s.Rotations,
-			Scales:          s.Scales,
-			Velocities:      s.Velocities,
-			CircleColliders: s.CircleColliders,
-			RigidBodies:     s.RigidBodies,
-			Sprites:         s.Sprites,
-			BulletTags:      s.BulletTags,
-			Hps:             s.Hps,
-		}, randPos.X, randPos.Y, 0, 0, 0)
-	}
 
 	manager := s.EntityManager.Create()
 	s.SceneManager.Create(manager, components.AsteroidSceneManager{})
@@ -126,34 +109,15 @@ func (s *AssteroddSystem) Init() {
 func (s *AssteroddSystem) Run(dt time.Duration) {
 	s.PlayerTags.EachEntity(func(e ecs.Entity) bool {
 		intents := s.SpaceshipIntents.Get(e)
+		keyboardInput := s.KeyboardInput.Get(e)
 
-		intents.MoveUp = false
-		intents.MoveDown = false
-		intents.RotateLeft = false
-		intents.RotateRight = false
-		intents.Fire = false
-
-		if rl.IsKeyDown(rl.KeyW) {
-			intents.MoveUp = true
-		}
-		if rl.IsKeyDown(rl.KeyS) {
-			intents.MoveDown = true
-		}
-
-		if rl.IsKeyDown(rl.KeyA) {
-			intents.RotateLeft = true
-		}
-		if rl.IsKeyDown(rl.KeyD) {
-			intents.RotateRight = true
-		}
-
-		if rl.IsKeyDown(rl.KeySpace) {
-			intents.Fire = true
-		}
-
+		intents.MoveUp = keyboardInput.MoveUp
+		intents.MoveDown = keyboardInput.MoveDown
+		intents.RotateLeft = keyboardInput.RotateLeft
+		intents.RotateRight = keyboardInput.RotateRight
+		intents.Fire = keyboardInput.Fire
 		return true
 	})
-
 	s.SceneManager.EachEntity(func(e ecs.Entity) bool {
 		sceneManager := s.SceneManager.Get(e)
 		s.PlayerTags.EachEntity(func(e ecs.Entity) bool {
@@ -162,7 +126,7 @@ func (s *AssteroddSystem) Run(dt time.Duration) {
 				return true
 			}
 			sceneManager.PlayerHp = playerHp.Hp
-			return false
+			return true
 		})
 		return true
 	})
