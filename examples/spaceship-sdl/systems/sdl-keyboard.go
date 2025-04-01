@@ -17,6 +17,9 @@ func NewSDLKeyboardSystem() SDLKeyboardSystem {
 
 type SDLKeyboardSystem struct {
 	KeyboardInput *components.KeyboardInputComponentManager
+	//Toggle, temporary
+	f9  bool
+	f12 bool
 }
 
 func (s *SDLKeyboardSystem) Init() {}
@@ -50,7 +53,22 @@ func (s *SDLKeyboardSystem) Run() {
 		input.Fire = true
 	}
 	if state[sdl.ScancodeF12] {
-		input.Debug = true
+		if !s.f12 {
+			input.Debug = true
+			s.f12 = true
+		}
+	} else {
+		s.f12 = false
+		input.Debug = false
+	}
+	if state[sdl.ScancodeF9] {
+		if !s.f9 {
+			input.Pprof = true
+			s.f9 = true
+		}
+	} else {
+		s.f9 = false
+		input.Pprof = false
 	}
 	if state[sdl.ScancodeK] {
 		input.Delete = true
@@ -63,6 +81,8 @@ func (s *SDLKeyboardSystem) Run() {
 		ki.RotateRight = input.RotateRight
 		ki.Fire = input.Fire
 		ki.Debug = input.Debug
+		ki.Delete = input.Delete
+		ki.Pprof = input.Pprof
 		ki.Escape = input.Escape
 		return true
 	})

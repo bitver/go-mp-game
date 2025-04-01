@@ -36,6 +36,6 @@ type SpriteMatrixV2 struct {
 
 type SpriteMatrixV2ComponentManager = ecs.SharedComponentManager[SpriteMatrixV2]
 
-func NewSpriteMatrixV2ComponentManager() SpriteMatrixComponentManager {
-	return ecs.NewSharedComponentManager[SpriteMatrix](SpriteMatrixV2ComponentId)
+func NewSpriteMatrixV2ComponentManager() SpriteMatrixV2ComponentManager {
+	return ecs.NewSharedComponentManager[SpriteMatrixV2](SpriteMatrixV2ComponentId)
 }

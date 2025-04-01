@@ -36,6 +36,10 @@ func (s *MainScene) Id() gomp.SceneId {
 	return MainSceneId
 }
 
+// SetRenderer is a stub function
+func (s *MainScene) SetRenderer(renderer gomp.RenderSystem) {
+}
+
 func (s *MainScene) Init() {
 	s.World.Init()
 
@@ -134,4 +138,4 @@ func (s *MainScene) OnExit() {
 
 }
 
-//var _ gomp.AnyScene = (*MainScene)(nil)
+var _ gomp.AnyScene = (*MainScene)(nil)

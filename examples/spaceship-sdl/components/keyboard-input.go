@@ -35,6 +35,7 @@ type KeyboardInput struct {
 	RotateRight bool
 	Fire        bool
 	Debug       bool
+	Pprof       bool
 	Escape      bool
 	Delete      bool
 }

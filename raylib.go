@@ -15,12 +15,13 @@ Thank you for your support!
 package gomp
 
 import (
+	"fmt"
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"time"
 )
 
-func NewRlRenderSystem(windowTitle string, width, height int32) *SDLRender {
-	return &SDLRender{
+func NewRlRenderSystem(windowTitle string, width, height int32) *RlRenderSystem {
+	return &RlRenderSystem{
 		windowTitle: windowTitle,
 		width:       width,
 		height:      height,
@@ -34,7 +35,8 @@ type RlRenderSystem struct {
 }
 
 func (s *RlRenderSystem) Init() {
-	//monitor := rl.GetCurrentMonitor()
+	monitor := rl.GetCurrentMonitor()
+	fmt.Println(monitor)
 	//width, height := rl.GetMonitorWidth(monitor), rl.GetMonitorHeight(monitor)
 	rl.InitWindow(s.width, s.height, s.windowTitle)
 	//rl.SetWindowState(rl.FlagFullscreenMode)

@@ -24,6 +24,7 @@ import (
 	"gomp/pkg/ecs"
 	"gomp/stdcomponents"
 	"gomp/vectors"
+	"log"
 	"math"
 	"slices"
 	"sync"
@@ -73,6 +74,7 @@ type RenderAssteroddSystem struct {
 	renderer     *sdl.Renderer
 	window       *sdl.Window
 	renderSystem *gomp.SDLRender
+	textTexture  *sdl.Texture
 }
 
 type sdlRenderEntry struct {
@@ -102,6 +104,13 @@ func (s *RenderAssteroddSystem) Init() {
 
 	//TODO: asset system
 	s.font = ttf.OpenFont("./Roboto-SemiBold.ttf", 96)
+	if s.font == nil {
+		log.Fatal("Error loading font")
+	}
+
+	var text = "Game Over"
+	textSurface := ttf.RenderTextBlended(s.font, text, uint64(len(text)), sdl.Color{R: 255, G: 0, B: 0, A: 255})
+	s.textTexture = sdl.CreateTextureFromSurface(s.renderer, textSurface)
 	s.monitorWidth = x
 	s.monitorHeight = y
 }
@@ -133,25 +142,14 @@ func (s *RenderAssteroddSystem) Run(dt time.Duration) bool {
 		sdl.RenderDebugText(s.renderer, 10, 50, fmt.Sprintf("Player HP: %d", a.PlayerHp))
 		sdl.RenderDebugText(s.renderer, 10, 70, fmt.Sprintf("Score: %d", a.PlayerScore))
 		if a.PlayerHp <= 0 {
-			//TODO: preload optimization
-			var text = "Game Over"
-			var textSizeW float32
-			var textSizeH float32
 
-			textSurface := ttf.RenderTextBlended(s.font, text, uint64(len(text)), sdl.Color{R: 255, G: 0, B: 0, A: 255})
-			textTexture := sdl.CreateTextureFromSurface(s.renderer, textSurface)
-			defer sdl.DestroySurface(textSurface)
-			defer sdl.DestroyTexture(textTexture)
-
-			sdl.GetTextureSize(textTexture, &textSizeW, &textSizeH)
 			var dstRect = sdl.FRect{
-				X: float32(s.monitorWidth-int32(textSizeW)) / 2,
-				Y: float32(s.monitorHeight-int32(textSizeH)) / 2,
-				W: float32(textSizeW),
-				H: float32(textSizeH),
+				X: float32(s.monitorWidth-s.textTexture.W) / 2,
+				Y: float32(s.monitorHeight-s.textTexture.H) / 2,
+				W: float32(s.textTexture.W),
+				H: float32(s.textTexture.H),
 			}
-
-			sdl.RenderTexture(s.renderer, textTexture, nil, &dstRect)
+			sdl.RenderTexture(s.renderer, s.textTexture, nil, &dstRect)
 		}
 		return false
 	})
@@ -160,6 +158,7 @@ func (s *RenderAssteroddSystem) Run(dt time.Duration) bool {
 }
 
 func (s *RenderAssteroddSystem) Destroy() {
+	sdl.DestroyTexture(s.textTexture)
 	ttf.CloseFont(s.font)
 }
 

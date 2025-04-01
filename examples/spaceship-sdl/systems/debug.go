@@ -4,12 +4,12 @@ Public License, v. 2.0. If a copy of the MPL was not distributed
 with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
-package stdsystems
+package systems
 
 import (
 	"fmt"
 	"github.com/felixge/fgprof"
-	rl "github.com/gen2brain/raylib-go/raylib"
+	"gomp/examples/spaceship-sdl/components"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -24,7 +24,8 @@ func NewDebugSystem() DebugSystem {
 }
 
 type DebugSystem struct {
-	pprofEnabled bool
+	pprofEnabled  bool
+	KeyboardInput *components.KeyboardInputComponentManager
 }
 
 func (s *DebugSystem) Init() {
@@ -37,7 +38,12 @@ func (s *DebugSystem) Init() {
 
 }
 func (s *DebugSystem) Run() {
-	if rl.IsKeyPressed(rl.KeyF9) {
+	var debug bool
+	s.KeyboardInput.EachComponent(func(k *components.KeyboardInput) bool {
+		debug = k.Pprof
+		return false
+	})
+	if debug {
 		if s.pprofEnabled {
 			pprof.StopCPUProfile()
 			fmt.Println("CPU Profile Stopped")

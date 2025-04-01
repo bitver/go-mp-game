@@ -6,40 +6,39 @@ replace github.com/ugorji/go v1.1.4 => github.com/ugorji/go v1.1.7
 
 require (
 	github.com/Zyko0/go-sdl3 v0.0.0-20250324113244-771f317184f7
-	github.com/coder/websocket v1.8.12
+	github.com/coder/websocket v1.8.13
 	github.com/felixge/fgprof v0.9.5
 	github.com/gen2brain/raylib-go/raylib v0.0.0-20250327103758-b542022337b8
-	github.com/hajimehoshi/ebiten/v2 v2.8.6
+	github.com/hajimehoshi/ebiten/v2 v2.8.7
 	github.com/hajimehoshi/go-steamworks v0.0.0-20241112125913-96b2a6baef69
 	github.com/jakecoffman/cp/v2 v2.1.0
-	github.com/jfreymuth/go-sdl3 v0.1.3-0.20250226211328-622f8250e21c
+	github.com/jfreymuth/go-sdl3 v0.1.4
 	github.com/jupiterrider/purego-sdl3 v0.0.0-20250331165459-320d4df1c9f3
-	github.com/labstack/echo-contrib v0.17.2
+	github.com/labstack/echo-contrib v0.17.3
 	github.com/labstack/gommon v0.4.2
 	github.com/negrel/assert v0.5.0
 	github.com/quasilyte/ebitengine-input v0.9.1
-	github.com/quic-go/quic-go v0.49.0
+	github.com/quic-go/quic-go v0.50.1
 	github.com/sevenNt/echo-pprof v0.1.1-0.20230131020615-4dd36891e14b
 	github.com/stretchr/testify v1.10.0
 	github.com/veandco/go-sdl2 v0.4.40
 	github.com/yohamta/donburi v1.15.7
-	golang.org/x/image v0.20.0
-	golang.org/x/time v0.10.0
+	golang.org/x/time v0.11.0
 )
 
 require (
 	github.com/Zyko0/purego-gen v0.0.0-20250308152853-097c3ba1e28a // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/francoispqt/gojay v1.2.13 // indirect
-	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
-	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
+	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
+	github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e // indirect
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
-	github.com/onsi/ginkgo/v2 v2.9.5 // indirect
+	github.com/onsi/ginkgo/v2 v2.23.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/quasilyte/gmath v0.0.0-20221217210116-fba37a2e15c7 // indirect
+	github.com/quasilyte/gmath v0.0.0-20250319124143-c988bf88bb48 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/mock v0.5.0 // indirect
@@ -51,7 +50,7 @@ require (
 )
 
 require (
-	github.com/ebitengine/gomobile v0.0.0-20240911145611-4856209ac325 // indirect
+	github.com/ebitengine/gomobile v0.0.0-20250329061421-6d0a8e981e4c // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.9.0-alpha.2.0.20250124174847-29f0104e3c2b // indirect
 	github.com/gorilla/sessions v1.4.0
@@ -60,9 +59,9 @@ require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0
-	google.golang.org/protobuf v1.36.1
+	google.golang.org/protobuf v1.36.6
 )

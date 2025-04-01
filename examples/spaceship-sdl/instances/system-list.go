@@ -24,7 +24,7 @@ import (
 func NewSystemList() SystemList {
 	newSystemList := SystemList{
 		Player:                   systems.NewPlayerSystem(),
-		Debug:                    stdsystems.NewDebugSystem(),
+		Debug:                    systems.NewDebugSystem(),
 		Velocity:                 stdsystems.NewVelocitySystem(),
 		Network:                  stdsystems.NewNetworkSystem(),
 		NetworkReceive:           stdsystems.NewNetworkReceiveSystem(),
@@ -61,7 +61,7 @@ func NewSystemList() SystemList {
 
 type SystemList struct {
 	Player                   systems.PlayerSystem
-	Debug                    stdsystems.DebugSystem
+	Debug                    systems.DebugSystem
 	Velocity                 stdsystems.VelocitySystem
 	Network                  stdsystems.NetworkSystem
 	NetworkReceive           stdsystems.NetworkReceiveSystem
